@@ -1,7 +1,7 @@
+local WeatherFetcher = require("WeatherFetcher") 
 local WeatherApp = {}
 WeatherApp.__index = WeatherApp
 
-local WeatherFetcher = require("WeatherFetcher") 
 
 function WeatherApp:new(api_key,format,lang)
     assert(api_key, "API key is required")
@@ -30,19 +30,19 @@ function WeatherApp:display_menu()
 end
 
 function WeatherApp:handle_choice(choice)
-    if choice == 1 then
+    if choice == "1" then
         self:get_forecast_by_city()
-    elseif choice == 2 then
+    elseif choice == "2" then
         self:get_forecast_by_zip()
-    elseif choice == 3 then
+    elseif choice == "3" then
         self:get_forecast_by_coordinates()
-    elseif choice == 4 then
+    elseif choice == "4" then
         self:view_favorite_forecasts()
-    elseif choice == 5 then
+    elseif choice == "5" then
         self:add_to_favorites()
-    elseif choice == 6 then
+    elseif choice == "6" then
         self:remove_from_favorites()
-    elseif choice == 7 then
+    elseif choice == "7" then
         print("Exiting the program ...")
         os.exit()
     else
@@ -53,8 +53,9 @@ end
 function WeatherApp:get_forecast_by_city()
     print("Enter city name:")
     local city = io.read()
-    self.fetcher = WeatherFetcher:new(self.api_key)
-    self.fetcher.ciy = city
+    assert(city,"City name cannot be empty") -- fix citys with spaces ex. (new york) = new+york
+    self.fetcher = WeatherFetcher:new(self.api_key,self.format,self.lang)
+    self.fetcher.city = city
     self.fetcher:process_weather_data("city")
 end
 
@@ -62,7 +63,7 @@ end
 function WeatherApp:get_forecast_by_zip()
     print("Enter ZIP code:")
     local zip = io.read()
-    self.fetcher = WeatherFetcher:new(self.api_key)
+    self.fetcher = WeatherFetcher:new(self.api_key,self.format,self.lang)
     self.fetcher.zip = zip
     self.fetcher:process_weather_data("ZIP")
 end
@@ -73,7 +74,7 @@ function WeatherApp:get_forecast_by_coordinates()
     local latitude = io.read()
     print("Enter longitude:")
     local longitude = io.read()
-    self.fetcher = WeatherFetcher:new(self.api_key)
+    self.fetcher = WeatherFetcher:new(self.api_key,self.format,self.lang)
     self.fetcher.latitude = latitude
     self.fetcher.longitude = longitude
     self.fetcher:process_weather_data("coordinates")
@@ -81,20 +82,10 @@ end
 
 function WeatherApp:run()
     while true do
-        local possibleOptions = {
-            [1] = true,
-            [2] = true,
-            [3] = true,
-            [4] = true,
-            [5] = true,
-            [6] = true,
-            [7] = true,
-            [8] = true,
-            [9] = true
-        }
         self:display_menu()
-        local choice = io.read("*n")
-        if not possibleOptions[choice] then
+        local choice = io.read()
+        local num_choice = tonumber(choice)
+        if not num_choice or num_choice < 1 or num_choice > 7 then
             print("Invalid choice, please input a number")
         else
             self:handle_choice(choice)

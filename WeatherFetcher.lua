@@ -75,21 +75,22 @@ function WeatherFetcher:process_weather_data(type)
     end
 
 end
-local function main()
+-- local function main()
 
-    local api_key = environment.api_key
-    local format = environment.format or "metric"
-    local lang = environment.lang or "LT"
+--     local api_key = environment.api_key
+--     local format = environment.format or "metric"
+--     local lang = environment.lang or "LT"
 
-    local success, err = pcall(function()
-        local weather_fetcher = WeatherFetcher:new(api_key,format,lang)
-        weather_fetcher:process_weather_data("ZIP")
-    end)
+--     local success, err = pcall(function()
+--         local weather_fetcher = WeatherFetcher:new(api_key,format,lang)
+--         weather_fetcher:process_weather_data("ZIP")
+--     end)
 
-    if not success then
-        print("An errod occurred: " .. err)
-    end
+--     if not success then
+--         print("An errod occurred: " .. err)
+--     end
 
-end
+-- end
 
-main()
+-- main()
+return WeatherFetcher
