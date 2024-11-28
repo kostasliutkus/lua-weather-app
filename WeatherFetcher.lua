@@ -1,6 +1,5 @@
 local http_request = require "http.request"
 local cjson = require "cjson"
-local environment = require "environment"
 
 local WeatherFetcher = {}
 WeatherFetcher.__index = WeatherFetcher
@@ -16,7 +15,7 @@ function WeatherFetcher:new(api_key,format,lang)
         latitude = nil, -- ex. 54.901727192586044
         longitude = nil, -- ex. 23.932813719674378
         zip = nil, -- ex 20011
-        country_code = country_code, -- US
+        country_code = nil, -- US
         endpoint = "https://api.openweathermap.org/data/2.5/forecast"
     }
     setmetatable(obj, self)
@@ -45,7 +44,7 @@ function WeatherFetcher:build_url(type)
 
     -- append api key
     url = url .. string.format("&appid=%s",self.api_key)
-    -- print(url)
+
     return url
 end
 
@@ -90,22 +89,5 @@ function WeatherFetcher:process_weather_data(type)
     print(string.rep("-",91))
 
 end
--- local function main()
 
---     local api_key = environment.api_key
---     local format = environment.format or "metric"
---     local lang = environment.lang or "LT"
-
---     local success, err = pcall(function()
---         local weather_fetcher = WeatherFetcher:new(api_key,format,lang)
---         weather_fetcher:process_weather_data("ZIP")
---     end)
-
---     if not success then
---         print("An errod occurred: " .. err)
---     end
-
--- end
-
--- main()
 return WeatherFetcher
