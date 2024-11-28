@@ -1,22 +1,25 @@
 local WeatherFetcher = require("WeatherFetcher") 
+local SQLiteDB = require("SQLiteDB") 
+
 local WeatherApp = {}
 WeatherApp.__index = WeatherApp
 
-
-function WeatherApp:new(api_key,format,lang)
+-- constructor
+function WeatherApp:new(api_key,format,lang,db_path)
     assert(api_key, "API key is required")
     local obj = {
         api_key = api_key,
         format = format or "metric",
         lang = lang or "LT",
-        favorite_cities = {},
+        db_path = db_path,
+        sqlitedb = nil,
         fetcher = nil
     }
     setmetatable(obj, WeatherApp)
     return obj
 end
 
-
+-- function to display the choice menu
 function WeatherApp:display_menu()
     print("\nWeather Forecast App")
     print("1. Get the forecast by city name")
@@ -29,6 +32,7 @@ function WeatherApp:display_menu()
     print("Enter your choice:")
 end
 
+-- function to handle menu choice
 function WeatherApp:handle_choice(choice)
     if choice == "1" then
         self:get_forecast_by_city()
@@ -50,25 +54,34 @@ function WeatherApp:handle_choice(choice)
     end
 end
 
+-- get forecast by city name
 function WeatherApp:get_forecast_by_city()
     print("Enter city name:")
     local city = io.read()
-    assert(city,"City name cannot be empty") -- fix citys with spaces ex. (new york) = new+york
+    assert(city,"City name cannot be empty") 
     self.fetcher = WeatherFetcher:new(self.api_key,self.format,self.lang)
     self.fetcher.city = city
     self.fetcher:process_weather_data("city")
 end
 
--- Get forecast by ZIP code
+-- get forecast by ZIP code
 function WeatherApp:get_forecast_by_zip()
+
     print("Enter ZIP code:")
     local zip = io.read()
+    assert(zip,"Please provide a ZIP code")
+
+    print("Enter Country Code:")
+    local country_code = io.read()
+    assert(zip,"Please provide a Country code")
+
     self.fetcher = WeatherFetcher:new(self.api_key,self.format,self.lang)
     self.fetcher.zip = zip
+    self.fetcher.country_code = country_code
     self.fetcher:process_weather_data("ZIP")
 end
 
--- Get forecast by coordinates
+-- get forecast by coordinates
 function WeatherApp:get_forecast_by_coordinates()
     print("Enter latitude:")
     local latitude = io.read()
@@ -80,6 +93,52 @@ function WeatherApp:get_forecast_by_coordinates()
     self.fetcher:process_weather_data("coordinates")
 end
 
+-- function to add a city to favorites
+function WeatherApp:add_to_favorites()
+    
+    print("Enter the name of the city to add to your favorites:")
+    local city = io.read()
+
+    self.sqlitedb = SQLiteDB:new(self.db_path)
+
+    local query = string.format("INSERT INTO favorites (city) VALUES ('%s')",city:gsub("'", "''"))
+
+    self.sqlitedb:execute_query(query)
+    self.sqlitedb:close()
+    print(city .. " has been added to your favorite cities list.")
+end
+
+-- function to add a city to favorites
+function WeatherApp:view_favorite_forecasts()
+
+    self.sqlitedb = SQLiteDB:new(self.db_path)
+
+    local query = "SELECT * FROM favorites"
+
+    local cursor = self.sqlitedb:execute_query(query)
+
+    local favorites = {}
+
+    local row = cursor:fetch({},"a")
+
+    while row do
+        table.insert(favorites, row)
+        row = cursor:fetch({}, "a") -- Fetch the next row
+    end
+    cursor:close()
+    self.sqlitedb:close()
+
+    self.fetcher = WeatherFetcher:new(self.api_key,self.format,self.lang)
+    
+    -- display favorites
+    for _, favorite in ipairs(favorites) do     
+        self.fetcher.city = favorite.city
+        self.fetcher:process_weather_data("city")
+    end
+
+end
+
+-- run app funciton
 function WeatherApp:run()
     while true do
         self:display_menu()

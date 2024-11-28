@@ -10,13 +10,13 @@ function WeatherFetcher:new(api_key,format,lang)
     assert(api_key, "API key is required")
     local obj = {
         api_key = api_key,
-        city = city or "Kaunas",
+        city = nil,
         format = format or "metric",
         lang = lang or "LT",
-        latitude = latitude or "54.901727192586044",
-        longitude = longitude or "23.932813719674378",
-        zip = zip or "20011",
-        country_code = country_code or "US",
+        latitude = nil, -- ex. 54.901727192586044
+        longitude = nil, -- ex. 23.932813719674378
+        zip = nil, -- ex 20011
+        country_code = country_code, -- US
         endpoint = "https://api.openweathermap.org/data/2.5/forecast"
     }
     setmetatable(obj, self)
@@ -37,14 +37,15 @@ function WeatherFetcher:build_url(type)
         assert(self.zip, "ZIP code must be set for ZIP")
         url = url .. string.format("&zip=%s,%s",self.zip,self.country_code)
     elseif type == "city" then
-        url = url .. string.format("&q=%s",self.city)
+        local city_no_white_space = self.city:gsub("%s","+") -- replace whitespaces with '+' symbol for api url ex. (new york) = new+york
+        url = url .. string.format("&q=%s",city_no_white_space)
     else
         print("Invalid Location Type.")
     end
 
     -- append api key
     url = url .. string.format("&appid=%s",self.api_key)
-    print(url)
+    -- print(url)
     return url
 end
 
@@ -63,16 +64,30 @@ end
 function WeatherFetcher:process_weather_data(type)
 
     local data = self:fetch_weather_data(type)
-    
-    print("City: " .. data.city.name)
-    print("Forecast: ")
+
+    -- temperature symbol based on format
+    local temp_symbol = ""
+    if self.format == "metric" then
+        temp_symbol = "°C"
+    elseif self.format == "imperial" then
+        temp_symbol = "°F"
+    else
+        temp_symbol = "K" 
+    end
+
+    -- table headers
+    print("\nWeather Forecast: ")
+    print(string.format("%-20s | %-20s| %-15s | %-30s", "Date", "City", "Temperature", "Description"))
+    print(string.rep("-",91))
+
     for _, forecast in ipairs(data.list) do
-        local timestamp = os.date("%Y-%m-%d %H:%M:%S", forecast.dt)
-        local temperature = forecast.main.temp
+        local timestamp = os.date("%Y-%m-%d %H:%M", forecast.dt)
+        local temperature = string.format("%.2f %s",forecast.main.temp,temp_symbol)
         local description = forecast.weather[1].description
 
-        print(string.format("[%s] Temp: %.2f° %s, Weather: %s", timestamp, temperature, self.format == "metric" and "C" or "F", description))
+        print(string.format("%-20s | %-20s | %-15s | %-30s", timestamp, data.city.name, temperature, description))
     end
+    print(string.rep("-",91))
 
 end
 -- local function main()
