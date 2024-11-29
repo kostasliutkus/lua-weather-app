@@ -7,7 +7,7 @@ OpenWeatherMap API (requires an API key).
 
 ### Setup
 Clone the repository:
-`git clone https://github.com/yourusername/weather-app.git
+`git clone [https://github.com/yourusername/weather-app.git]
 cd weather-app`
 
 ### Install dependencies:
