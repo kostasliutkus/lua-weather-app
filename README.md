@@ -22,7 +22,7 @@ Create the SQLite database:
 Ensure the favorites table exists:
 `
 CREATE TABLE favorites (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     city TEXT UNIQUE
 );`
 
