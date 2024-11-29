@@ -30,6 +30,7 @@ Set up your API key, default format, language, and database path in the main.lua
 Run the application:
 
 `lua main.lua`
+
 Follow the menu options to:
 
 Fetch weather by city name, ZIP code, or coordinates.
