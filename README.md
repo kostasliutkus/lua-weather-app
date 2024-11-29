@@ -14,7 +14,8 @@ Clone the repository:
 ### Install dependencies:
 
 Set up LuaSQL SQLite3 as per your environment.
-Obtain an API key from a weather provider (e.g., OpenWeatherMap).
+Obtain an API key from OpenWeatherMap.org
+
 Create the SQLite database:
 `sqlite3 forecast.db`
 
