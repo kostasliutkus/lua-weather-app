@@ -16,6 +16,7 @@ Clone the repository:
 Set up LuaSQL SQLite3 as per your environment.
 Obtain an API key from a weather provider (e.g., OpenWeatherMap).
 Create the SQLite database:
+`sqlite3 forecast.db`
 
 Ensure the favorites table exists:
 `
